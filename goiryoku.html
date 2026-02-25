@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>単語語彙力クイズ（スコア付き）</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f6f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  width: 400px;
+  text-align: center;
+}
+h2 { margin-top: 0; }
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: white;
+  cursor: pointer;
+}
+button:hover { background: #4338ca; }
+.result { margin-top: 15px; font-weight: bold; font-size: 18px; }
+#score { margin-top: 10px; font-size: 16px; color: #333; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>語彙力クイズ</h2>
+  <div id="question">---</div>
+  <div id="choices"></div>
+  <div class="result" id="result"></div>
+  <div id="score"></div>
+  <button onclick="nextQuestion()">次の問題</button>
+</div>
+
+<script>
+// CSVデータをJavaScript配列に変換（100語）
+const vocabData = [
+  {word:"吝か",reading:"やぶさか",meaning:"物惜しみするさま"},
+  {word:"憂鬱",reading:"ゆううつ",meaning:"気分が晴れない"},
+  {word:"朗らか",reading:"ほがらか",meaning:"明るく元気なさま"},
+  {word:"齟齬",reading:"そご",meaning:"かみ合わないこと"},
+  {word:"寡黙",reading:"かもく",meaning:"あまりしゃべらないこと"},
+  {word:"渋い",reading:"しぶい",meaning:"味わい深く落ち着いた感じ"},
+  {word:"虚栄",reading:"きょえい",meaning:"うわべの見栄を張ること"},
+  {word:"哀愁",reading:"あいしゅう",meaning:"もの悲しい気分"},
+  {word:"冷徹",reading:"れいてつ",meaning:"感情に流されないこと"},
+  {word:"軽率",reading:"けいそつ",meaning:"深く考えずに行動するさま"},
+  {word:"典雅",reading:"てんが",meaning:"上品で趣のあるさま"},
+  {word:"奔放",reading:"ほんぽう",meaning:"自由にふるまうさま"},
+  {word:"寛容",reading:"かんよう",meaning:"心が広く受け入れるさま"},
+  {word:"精緻",reading:"せいち",meaning:"細かく正確であること"},
+  {word:"傲慢",reading:"ごうまん",meaning:"自分を高く評価して他を見下すさま"},
+  {word:"剛毅",reading:"ごうき",meaning:"強くて決断力のあるさま"},
+  {word:"陰鬱",reading:"いんうつ",meaning:"気分が沈んで重苦しいさま"},
+  {word:"儚い",reading:"はかない",meaning:"はかで消えやすいさま"},
+  {word:"俊敏",reading:"しゅんびん",meaning:"動きや考えが素早い"},
+  {word:"冷淡",reading:"れいたん",meaning:"感情が薄く冷たいさま"},
+  {word:"簡潔",reading:"かんけつ",meaning:"簡単で無駄がないこと"},
+  {word:"重厚",reading:"じゅうこう",meaning:"力強く落ち着いたさま"},
+  {word:"柔軟",reading:"じゅうなん",meaning:"考えや態度がしなやかであること"},
+  {word:"冷静",reading:"れいせい",meaning:"感情に左右されず落ち着くこと"},
+  {word:"典型",reading:"てんけい",meaning:"代表的な例や型"},
+  {word:"慎重",reading:"しんちょう",meaning:"注意深く行動するさま"},
+  {word:"華麗",reading:"かれい",meaning:"美しく立派なさま"},
+  {word:"精巧",reading:"せいこう",meaning:"細かく作られているさま"},
+  {word:"感嘆",reading:"かんたん",meaning:"感心して驚くこと"},
+  {word:"剽軽",reading:"ひょうきん",meaning:"気が利いてユーモアのあるさま"},
+  {word:"漸減",reading:"ぜんげん",meaning:"少しずつ減ること"},
+  {word:"奔流",reading:"ほんりゅう",meaning:"勢いよく流れること"},
+  {word:"貪欲",reading:"どんよく",meaning:"欲が強いこと"},
+  {word:"剛直",reading:"ごうちょく",meaning:"強くて正直なこと"},
+  {word:"精励",reading:"せいれい",meaning:"力を尽くして努力すること"},
+  {word:"軽妙",reading:"けいみょう",meaning:"動作や言葉が巧みで楽しいさま"},
+  {word:"頑強",reading:"がんきょう",meaning:"強くて壊れにくいこと"},
+  {word:"暢達",reading:"ちょうたつ",meaning:"考えや意見をよく述べること"},
+  {word:"閑雅",reading:"かんが",meaning:"落ち着いて上品なさま"},
+  {word:"豊穣",reading:"ほうじょう",meaning:"作物がよく実ること"},
+  {word:"荘厳",reading:"そうごん",meaning:"厳かで立派なさま"},
+  {word:"俊才",reading:"しゅんさい",meaning:"優れた才能を持つ人"},
+  {word:"飄逸",reading:"ひょういつ",meaning:"風のように軽やかで自由なさま"},
+  {word:"寂寥",reading:"せきりょう",meaning:"寂しくて物寂しいさま"},
+  {word:"堅牢",reading:"けんろう",meaning:"しっかりしていて壊れにくいさま"},
+  {word:"剛毅果断",reading:"ごうきかだん",meaning:"強くて決断力があるさま"},
+  {word:"廉潔",reading:"れんけつ",meaning:"心が清く正しいこと"},
+  {word:"簡明",reading:"かんめい",meaning:"簡単でわかりやすいこと"},
+  {word:"沈着",reading:"ちんちゃく",meaning:"落ち着いていること"},
+  {word:"温厚",reading:"おんこう",meaning:"性格が穏やかで優しいこと"},
+  {word:"卓越",reading:"たくえつ",meaning:"他より優れていること"},
+  {word:"精密",reading:"せいみつ",meaning:"細かく正確であること"},
+  {word:"謹厳",reading:"きんげん",meaning:"慎み深く厳かなさま"},
+  {word:"柔和",reading:"にゅうわ",meaning:"穏やかで柔らかいさま"},
+  {word:"俊敏機敏",reading:"しゅんびんきびん",meaning:"頭や動作が速いこと"},
+  {word:"毅然",reading:"きぜん",meaning:"意志がしっかりしていること"},
+  {word:"粛然",reading:"しゅくぜん",meaning:"身が引き締まるような厳かなさま"},
+  {word:"清廉",reading:"せいれん",meaning:"心が清く正しいこと"},
+  {word:"堂々",reading:"どうどう",meaning:"落ち着いて立派なさま"}
+];
+
+let currentIndex = -1;
+let score = 0;
+let questionsAsked = 0;
+
+function shuffle(array){
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function nextQuestion(){
+  const resultDiv = document.getElementById("result");
+  const scoreDiv = document.getElementById("score");
+  resultDiv.textContent = "";
+
+  if(questionsAsked >= 100){
+    document.getElementById("question").textContent = `🎉 クイズ終了！ 最終スコア: ${score}/100`;
+    document.getElementById("choices").innerHTML = "";
+    scoreDiv.textContent = "";
+    return;
+  }
+
+  currentIndex++;
+  if(currentIndex >= vocabData.length){
+    currentIndex = 0;
+    shuffle(vocabData);
+  }
+
+  const qData = vocabData[currentIndex];
+  document.getElementById("question").textContent = `(${questionsAsked+1}/100) 「${qData.word}（${qData.reading}）」の意味は？`;
+
+  const correct = qData.meaning;
+  let otherMeanings = vocabData.filter(v=>v.meaning!==correct).map(v=>v.meaning);
+  shuffle(otherMeanings);
+  otherMeanings = otherMeanings.slice(0,3);
+  const choices = shuffle([correct, ...otherMeanings]);
+
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+  choices.forEach(choice=>{
+    const btn = document.createElement("button");
+    btn.textContent = choice;
+    btn.onclick = () => checkAnswer(choice);
+    choicesDiv.appendChild(btn);
+  });
+
+  questionsAsked++;
+}
+
+function checkAnswer(selected){
+  const resultDiv = document.getElementById("result");
+  const scoreDiv = document.getElementById("score");
+  const correct = vocabData[currentIndex].meaning;
+  if(selected === correct){
+    resultDiv.textContent = "✅ 正解！";
+    score++;
+  } else {
+    resultDiv.textContent = `❌ 不正解… 正解は: ${correct}`;
+  }
+  scoreDiv.textContent = `現在のスコア: ${score} / ${questionsAsked}`;
+}
+
+// 初期化
+shuffle(vocabData);
+nextQuestion();
+</script>
+
+</body>
+</html>

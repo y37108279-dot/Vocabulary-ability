@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>単語語彙力クイズ（スコア付き）</title>
+<title>単語語彙力クイズ（音付き）</title>
 <style>
 body {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -50,8 +50,12 @@ button:hover { background: #4338ca; }
   <button onclick="nextQuestion()">次の問題</button>
 </div>
 
+<!-- 効果音 -->
+<audio id="correctSound" src="https://freesound.org/data/previews/64/64531_634166-lq.mp3"></audio>
+<audio id="wrongSound" src="https://freesound.org/data/previews/82/82525_1022657-lq.mp3"></audio>
+
 <script>
-// CSVデータをJavaScript配列に変換（100語）
+// 100語のデータ（前回のもの）
 const vocabData = [
   {word:"吝か",reading:"やぶさか",meaning:"物惜しみするさま"},
   {word:"憂鬱",reading:"ゆううつ",meaning:"気分が晴れない"},
@@ -165,11 +169,16 @@ function checkAnswer(selected){
   const resultDiv = document.getElementById("result");
   const scoreDiv = document.getElementById("score");
   const correct = vocabData[currentIndex].meaning;
+  const correctSound = document.getElementById("correctSound");
+  const wrongSound = document.getElementById("wrongSound");
+
   if(selected === correct){
     resultDiv.textContent = "✅ 正解！";
     score++;
+    correctSound.play();
   } else {
     resultDiv.textContent = `❌ 不正解… 正解は: ${correct}`;
+    wrongSound.play();
   }
   scoreDiv.textContent = `現在のスコア: ${score} / ${questionsAsked}`;
 }
